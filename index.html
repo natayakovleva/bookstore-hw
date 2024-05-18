@@ -12,12 +12,22 @@
 
 <main class="main">
   <div class="sort">
-    !!SORT!!
+    <fieldset class="fieldset" id="sortPriceGroup">
+      <legend>price:</legend>
+      <div>
+        <input type="checkbox" id="asc" name="asc" />
+        <label for="asc">asc</label>
+      </div>
+      <div>
+        <input type="checkbox" id="desc" name="desc" />
+        <label for="desc">desc</label>
+      </div>
+    </fieldset>
   </div>
 
   <div class="content">
     <aside>
-      <fieldset class="fieldset" id="languageGroup">
+      <fieldset class="fieldset" id="categoryGroup">
         <legend>category:</legend>
         <div>
           <input type="checkbox" id="business" name="business" />
@@ -64,7 +74,7 @@
           <label for="paperback">Paperback</label>
         </div>
       </fieldset>
-      <button></button>
+      <button class="apply">Apply</button>
     </aside>
     <div class="products">
       <div class="cards"></div> 
