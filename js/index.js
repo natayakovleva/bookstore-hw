@@ -3,7 +3,10 @@ import { createCards } from './cards.js';
 import { getFilters } from './filter.js';
 import { setFilters } from './filter.js';
 import { selectFilter } from './filter.js';
-import {saveDataToIndexedDB} from './dataBase.js';
+import { saveDataToIndexedDB } from './dataBase.js';
+import { getDataFromIndexedDB } from "./dataBase.js";
+import { basketCount } from './generalFunction.js';
+
 
 let displayData = [];
 let productsData = [];
@@ -12,6 +15,20 @@ let firstSkip = 0;
 const cards = document.querySelector('.cards');
 const btnShowMoreCards = document.querySelector('.show-cards');
 
+
+getDataFromIndexedDB("basket", function (error, data) {
+  if (error) {
+    console.error("Basket was empty", error);
+  } else {
+    basket = data;
+    basketCount(basket);
+    const allCards = document.querySelectorAll('.card');
+    console.log(cards);
+
+
+
+  }
+});
 
 getData();
 
@@ -140,6 +157,7 @@ let basket = [];
 
 
 cards.addEventListener('click', handleCardClick);
+
 function handleCardClick(event) {
   const targetButton = event.target.closest('.card__add');
   if (!targetButton) return;
@@ -153,10 +171,9 @@ function handleCardClick(event) {
   if (basket.includes(currentProduct)) return;
   basket.push(currentProduct);
   targetButton.classList.toggle('active');
-
-  const basketCount = document.querySelector('.basket__count');
-  basketCount.textContent = basket.length;
-
+  basketCount(basket);
   saveDataToIndexedDB(basket, 'basket');
 
 }
+
+

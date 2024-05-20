@@ -28,6 +28,11 @@
   position: relative;
 }
 
+.basket__icon{
+  width: 38px;
+}
+
+
 /* .cart__del-card{
   position: absolute;
   top: -10px;
