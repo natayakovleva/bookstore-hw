@@ -2,17 +2,18 @@
 import { createCards } from './cards.js';
 import { getFilters } from './filter.js';
 import { setFilters } from './filter.js';
+import { selectFilter } from './filter.js';
+import {saveDataToIndexedDB} from './dataBase.js';
 
+let displayData = [];
 let productsData = [];
 let countOfCardsOnScrean = 5;
 let firstSkip = 0;
 const cards = document.querySelector('.cards');
-let isFiltred = false;
+const btnShowMoreCards = document.querySelector('.show-cards');
 
 
 getData();
-
-
 
 
 // Получение товаров (JSON)
@@ -24,10 +25,11 @@ async function getData() {
         throw new Error(res.statusText);
       }
       productsData = await res.json();
-      
+      displayData = JSON.parse(JSON.stringify(productsData));
     }
   // перое прорисовывание
-  getProducts(productsData, firstSkip, countOfCardsOnScrean);
+
+  getProducts(displayData, firstSkip, countOfCardsOnScrean);
 
   } catch (err) {
     console.log(err.message);
@@ -35,60 +37,126 @@ async function getData() {
 }
 
 
-function getProducts(data, skip, take, getFilter, getSort) {
+function getProducts(data, skip, take) {
   // проверяем, является ли переменная data пустой или неопределенной (null, undefined) 
-  
+  // console.log(data);
   if (!data || !data.length) {   
     console.error('ERROR');
     return; 
   }
+  // console.log(`firstSkip -   ${firstSkip}`);
   cards.innerHTML = "";
   const firstEl = skip;
   const lastEL = skip + take;
+
   const addcards = data.slice(firstEl, lastEL); // отрезаем 
-  firstSkip = lastEL;
-  
   createCards(addcards);
-
-
 }
 
 
-// Сортировка
-function sortProducts(data, parameter) {
-  const sortData = data.slice().sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-  return sortData;
-}
 
-const ascCheckbox = document.getElementById('asc');
-const descCheckbox = document.getElementById('desc');
-
-// Добавляем обработчик события изменения состояния для каждого чекбокса
-ascCheckbox.addEventListener('change', function() {
-  console.log('change');
-  if (!isFiltred) {
-    console.log(!isFiltred);
-    const sortData= sortProducts(productsData, 'price');
-    console.log(sortData);
-    getProducts(sortData, firstSkip, countOfCardsOnScrean);
-  }
-  
-
-
-
-});
-
-
-
+selectFilter('categoryGroup');
+selectFilter('languageGroup');
+selectFilter('bindingGroup');
 
 
 // получение отфильтрованого масива
 document.querySelector('.apply').addEventListener('click', () => {
+  const categoryGroup = document.querySelectorAll('#categoryGroup input[type="checkbox"]');
+  const languageGroup = document.querySelectorAll('#languageGroup input[type="checkbox"]');
+  const bindingGroup = document.querySelectorAll('#bindingGroup input[type="checkbox"]');
+  const allGroups = [...categoryGroup, ...languageGroup, ...bindingGroup];
+  const allUnchecked = allGroups.every(checkbox => !checkbox.checked);
+  
+  if (allUnchecked) {
+    displayData = JSON.parse(JSON.stringify(productsData));
+    firstSkip = 0;
+    getProducts(displayData, firstSkip, countOfCardsOnScrean);
+    return;
+  } 
+
+
   const filtersList = getFilters(); 
-  // console.log(filtersList);
   const filteredData = setFilters(productsData, filtersList);
-  console.log(filteredData);
 
-
+  // updateFilters();
+  const filtetSkip = 0;
+  const filterTake = countOfCardsOnScrean;
+  displayData = JSON.parse(JSON.stringify(filteredData));
+  // console.log(displayData);
+  getProducts(displayData, filtetSkip, filterTake);
 });
 
+
+// Сортировка
+
+  const ascBtn = document.querySelector('.sort__price-asc');
+  const descBtn = document.querySelector('.sort__price-desc');
+
+  ascBtn.addEventListener('click', () => {
+    const sortData = sortProductsPriceAsc(displayData);
+    // console.log(sortData);
+    const sortSkip = 0;
+    const sortTake = countOfCardsOnScrean;
+    displayData = JSON.parse(JSON.stringify(sortData));
+    getProducts(displayData, sortSkip, sortTake);
+
+  });
+
+  descBtn.addEventListener('click', () => {
+    const sortData = sortProductsPriceDesc(displayData);
+    // console.log(sortData);
+    const sortSkip = 0;
+    const sortTake = countOfCardsOnScrean;
+    displayData = JSON.parse(JSON.stringify(sortData));
+    getProducts(displayData, sortSkip, sortTake);
+
+  });
+
+function sortProductsPriceAsc(data) {
+  return data.slice().sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+}
+
+
+function sortProductsPriceDesc(data) {
+  return data.slice().sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+}
+
+
+let showTake = countOfCardsOnScrean;
+btnShowMoreCards.addEventListener('click', () => {
+  const showSkip = 0;
+  showTake += countOfCardsOnScrean;
+  // if (showTake >= displayData.length) {
+  //   btnShowMoreCards.textContent = 'END';
+
+  // }
+  getProducts(displayData, showSkip, showTake);
+  
+});
+
+
+let basket = [];
+
+
+cards.addEventListener('click', handleCardClick);
+function handleCardClick(event) {
+  const targetButton = event.target.closest('.card__add');
+  if (!targetButton) return;
+
+  const card = targetButton.closest('.card');
+
+  const id = parseInt(card.dataset.productId);
+  const currentProduct = productsData.find(item => item.id === id);
+
+
+  if (basket.includes(currentProduct)) return;
+  basket.push(currentProduct);
+  targetButton.classList.toggle('active');
+
+  const basketCount = document.querySelector('.basket__count');
+  basketCount.textContent = basket.length;
+
+  saveDataToIndexedDB(basket, 'basket');
+
+}

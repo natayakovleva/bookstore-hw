@@ -1,10 +1,10 @@
 
 // Рендер карточки
 export function createCards(data) {
-  const cards = document.querySelector('.cards');
-  data.forEach(card => {
-  const { id, title, author, price, image } = card;
-  const cardItem = 
+    const cards = document.querySelector('.cards');
+    data.forEach(card => {
+    const { id, title, author, price, image } = card;
+    const cardItem = 
     `
               <div class="card" data-product-id="${id}">
                   <div class="card__top">
@@ -25,6 +25,6 @@ export function createCards(data) {
                   </div>
               </div>
           `;
-      cards.insertAdjacentHTML('beforeend', cardItem);
+cards.innerHTML += cardItem;
 });
 }

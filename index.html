@@ -9,26 +9,29 @@
 <body>
 
 <header class="header">HEADER</header>
+<a href="basket.html" class="basket">
+  <div class="basket__inner">
+      <img src="img/basket-icon.svg" alt="basket icon" class="basket__icon">
+      <span class="basket__count">0</span>
+  </div>
+</a>
+
 
 <main class="main">
   <div class="sort">
-    <fieldset class="fieldset" id="sortPriceGroup">
-      <legend>price:</legend>
-      <div>
-        <input type="checkbox" id="asc" name="asc" />
-        <label for="asc">asc</label>
-      </div>
-      <div>
-        <input type="checkbox" id="desc" name="desc" />
-        <label for="desc">desc</label>
-      </div>
-    </fieldset>
+    <div class="sort__price">
+      <p>Price</p>
+      <button class="sort__price-asc">in ascending order</button>
+      <button class="sort__price-desc">in descending order</button>
+    </div>
+
+
   </div>
 
   <div class="content">
     <aside>
       <fieldset class="fieldset" id="categoryGroup">
-        <legend>category:</legend>
+        <legend>Category:</legend>
         <div>
           <input type="checkbox" id="business" name="business" />
           <label for="business">Business</label>
@@ -39,7 +42,7 @@
         </div>
         <div>
           <input type="checkbox" id="health" name="health" />
-          <label for="health">Health & Fitness</label>
+          <label for="health">Health</label>
         </div>
         <div>
           <input type="checkbox" id="classics" name="classics" />

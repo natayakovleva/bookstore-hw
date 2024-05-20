@@ -1,10 +1,27 @@
 
+//возможен выбот только одного фильра в группе
+export function selectFilter(groupName){
+  document.getElementById(groupName).addEventListener('change', function(event) {
+    if (event.target.type === 'checkbox') {
+        const checkboxes = document.querySelectorAll(`#${groupName} input[type="checkbox"]`);
+        checkboxes.forEach(checkbox => {
+            if (checkbox !== event.target) {
+                checkbox.checked = false;
+            }
+        });
+    }
+  });
+} 
+
+
 //общая функция для Checkboxes (Собираем активные категории)
 function writeFilledFilters(groupOfinputs, list, nameOfKey) {
   groupOfinputs.forEach(function(checkbox) {
     if (checkbox.checked) {
         const value = checkbox.getAttribute('id');
+        console.log(`value  -  ${value}`);
         list[nameOfKey] = value.charAt(0).toUpperCase() + value.slice(1);
+
     }
   });
 }
@@ -33,11 +50,21 @@ export function getFilters() {
 export function setFilters(data, filters) {
 
   let filteredData = data.filter(card => {
+// console.log(card.category);
+// console.log(filters.category);
+
 
     return  (!filters.category || card.category === filters.category) &&
-            (!filters.language || card.language === filters.language) &&
-            (!filters .binding || card.binding === filters.binding);
+            (!filters.language|| card.language === filters.language) &&
+            (!filters.binding || card.binding === filters.binding);
   });
-
+console.log(filteredData);
 return filteredData;
 }
+
+function checkedFalseAll(group){
+  group.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+}
+
