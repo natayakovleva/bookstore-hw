@@ -39,7 +39,7 @@
         "category":"Business",
         "language":"English",
         "price":"8.49",
-        "stock":"0",
+        "stock":"1",
         "image":"img-04.jpg",
         "binding":"Hardcover"
      },
@@ -204,7 +204,7 @@
         "category":"Classics",
         "language":"English",
         "price":"7.99",
-        "stock":"0",
+        "stock":"1",
         "image":"img-19.webp",
         "binding":"Hardcover"
      },

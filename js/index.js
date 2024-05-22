@@ -22,11 +22,7 @@ getDataFromIndexedDB("basket", function (error, data) {
   } else {
     basket = data;
     basketCount(basket);
-    const allCards = document.querySelectorAll('.card');
-    console.log(cards);
-
-
-
+    activeCards(basket);
   }
 });
 
@@ -44,9 +40,9 @@ async function getData() {
       productsData = await res.json();
       displayData = JSON.parse(JSON.stringify(productsData));
     }
-  // перое прорисовывание
+  // первое прорисовывание
 
-  getProducts(displayData, firstSkip, countOfCardsOnScrean);
+  getProducts(basket, displayData, firstSkip, countOfCardsOnScrean);
 
   } catch (err) {
     console.log(err.message);
@@ -54,20 +50,22 @@ async function getData() {
 }
 
 
-function getProducts(data, skip, take) {
+function getProducts(basketData, data, skip, take) {
   // проверяем, является ли переменная data пустой или неопределенной (null, undefined) 
-  // console.log(data);
   if (!data || !data.length) {   
     console.error('ERROR');
+    cards.innerHTML = '';
     return; 
   }
   // console.log(`firstSkip -   ${firstSkip}`);
+  
   cards.innerHTML = "";
   const firstEl = skip;
   const lastEL = skip + take;
 
   const addcards = data.slice(firstEl, lastEL); // отрезаем 
   createCards(addcards);
+  activeCards(basketData);
 }
 
 
@@ -88,7 +86,7 @@ document.querySelector('.apply').addEventListener('click', () => {
   if (allUnchecked) {
     displayData = JSON.parse(JSON.stringify(productsData));
     firstSkip = 0;
-    getProducts(displayData, firstSkip, countOfCardsOnScrean);
+    getProducts(basket, displayData, firstSkip, countOfCardsOnScrean);
     return;
   } 
 
@@ -101,7 +99,7 @@ document.querySelector('.apply').addEventListener('click', () => {
   const filterTake = countOfCardsOnScrean;
   displayData = JSON.parse(JSON.stringify(filteredData));
   // console.log(displayData);
-  getProducts(displayData, filtetSkip, filterTake);
+  getProducts(basket, displayData, filtetSkip, filterTake);
 });
 
 
@@ -116,7 +114,7 @@ document.querySelector('.apply').addEventListener('click', () => {
     const sortSkip = 0;
     const sortTake = countOfCardsOnScrean;
     displayData = JSON.parse(JSON.stringify(sortData));
-    getProducts(displayData, sortSkip, sortTake);
+    getProducts(basket, displayData, sortSkip, sortTake);
 
   });
 
@@ -126,7 +124,7 @@ document.querySelector('.apply').addEventListener('click', () => {
     const sortSkip = 0;
     const sortTake = countOfCardsOnScrean;
     displayData = JSON.parse(JSON.stringify(sortData));
-    getProducts(displayData, sortSkip, sortTake);
+    getProducts(basket, displayData, sortSkip, sortTake);
 
   });
 
@@ -144,13 +142,15 @@ let showTake = countOfCardsOnScrean;
 btnShowMoreCards.addEventListener('click', () => {
   const showSkip = 0;
   showTake += countOfCardsOnScrean;
-  // if (showTake >= displayData.length) {
-  //   btnShowMoreCards.textContent = 'END';
-
-  // }
-  getProducts(displayData, showSkip, showTake);
   
+  getProducts(basket, displayData, showSkip, showTake);
+  console.log(showTake);
+  console.log(displayData.length);
+  if (showTake >= displayData.length) {
+    btnShowMoreCards.disabled = true;
+  }
 });
+
 
 
 let basket = [];
@@ -167,13 +167,37 @@ function handleCardClick(event) {
   const id = parseInt(card.dataset.productId);
   const currentProduct = productsData.find(item => item.id === id);
 
+  targetButton.classList.toggle('active');
 
   if (basket.includes(currentProduct)) return;
   basket.push(currentProduct);
-  targetButton.classList.toggle('active');
   basketCount(basket);
   saveDataToIndexedDB(basket, 'basket');
+}
 
+// функция для доб стиля кнопке
+function activeCards(data) {
+  // const currentProduct = data.find(item => item.id === id);
+  const ids = data.map(item => item.id);
+  ids.forEach(productId => {
+    const btn = findBtnById(productId);
+
+    if (btn) {
+        btn.classList.add('active');
+    }
+});
 }
 
 
+function findBtnById(id) {
+  // Знаходимо картку з певним productId
+  const card = cards.querySelector(`.card[data-product-id="${id}"]`);
+  
+  // Якщо картка знайдена, знаходимо кнопку всередині цієї картки
+  if (card) {
+    const btn = card.querySelector('.card__add');
+    return btn;
+  } else {
+    return null;
+  }
+}

@@ -19,7 +19,6 @@ function writeFilledFilters(groupOfinputs, list, nameOfKey) {
   groupOfinputs.forEach(function(checkbox) {
     if (checkbox.checked) {
         const value = checkbox.getAttribute('id');
-        console.log(`value  -  ${value}`);
         list[nameOfKey] = value.charAt(0).toUpperCase() + value.slice(1);
 
     }

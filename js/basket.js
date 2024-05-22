@@ -12,17 +12,22 @@ getDataFromIndexedDB("basket", function (error, data) {
     basket = data;
     getBasket(basket);
     removeProduct();
-    calculateTotalPrice(basket);
+    calculateTotalPrice();
     basketCount(basket);
   }
 });
 
-function calculateTotalPrice(data) {
-  const totalPrice = data.reduce((sum, item) => {
-    return sum + parseFloat(item.price);
-  }, 0);
-  const total = document.querySelector(".price__count");
-  total.textContent = totalPrice;
+function calculateTotalPrice() {
+  const totalEl = document.querySelector(".price__count");
+  const priceEl = document.querySelectorAll('.cart__price span');
+  let total = 0;
+
+  priceEl.forEach(priceElement => {
+    const priceText = priceElement.textContent;
+    const price = parseFloat(priceText.replace('$', ''));
+    total += price;
+  });
+  totalEl.textContent = total.toFixed(2);
 }
 
 function getBasket(data) {
@@ -44,20 +49,25 @@ function renderProductsBasket(arr) {
     const { id, title, author, price, image } = card;
     const cardItem = `
       <div class="cart__product" data-product-id="${id}">
+        <div class="cart__inner">
           <div class="cart__img">
               <img src="./img/${image}" alt="${title}">
           </div>
           <div class="cart__title">${title}</div>
-          <div class="cart__title">${author}</div>
+          <div class="cart__author">${author}</div>
           <div class="cart__block-btns">
-          <button class="cart__minus">-</button>
-          <div class="cart__count">1</div>
-          <button class="cart__plus">+</button>
+            <button class="cart__minus">-</button>
+            <div class="cart__count">1</div>
+            <button class="cart__plus">+</button>
           </div>
           <div class="cart__price">
               <span>${price}$</span>
           </div>
           <button class="remove-btn">X</button>
+        </div>
+        <div>
+          <p class="cart__message"></p>
+        </div>
       </div>
       `;
 
@@ -73,12 +83,12 @@ function removeProduct() {
 
     button.addEventListener("click", (event) => {
       const cartItem = event.target.closest(".cart__product");
-      console.log(cartItem);
+      
       if (cartItem) {
         const id = parseInt(cartItem.dataset.productId);
         cartItem.remove();
         removeDataById(basket, id);
-        calculateTotalPrice(basket);
+        calculateTotalPrice();
       }
     });
   });
@@ -94,31 +104,41 @@ function removeDataById(data, id) {
 
 
 cart.addEventListener('click', (event) => {
-    // if (event.target.classList.contains('cart__minus') || event.target.classList.contains('cart__plus')) {
-        const cartItem = event.target.closest('.cart__product');
-        const countElement = cartItem.querySelector('.cart__count');
-        let count = parseInt(countElement.textContent, 10);
-        const id = parseInt(cartItem.dataset.productId);
-        const priceEl = cartItem.querySelector('.cart__price');
-        const stock = basket[id-1].stock;
-        
-        const price = parseFloat(priceEl.textContent.replace(/[^\d.-]/g, ''));
+    
+  // const total = document.querySelector(".price__count");
+  const cartItem = event.target.closest('.cart__product');
+  const countElement = cartItem.querySelector('.cart__count');
+  const priceEl = cartItem.querySelector('.cart__price span');
+  const message = cartItem.querySelector('.cart__message');
 
-        if (event.target.classList.contains('cart__minus')) {
-            if (count > 1) { // Assuming the minimum quantity is 1
-                count--;
-                // priceEl.textContent = `${(basket[id-1].price * count).toFixed(2)}$`;
-                priceEl.textContent = `${(price * count).toFixed(2)}$`;
-            }
-        } else if (event.target.classList.contains('cart__plus')) {
-            if (stock > count) {
-                
-                count++;
-                // priceEl.textContent = `${(basket[id-1].price * count).toFixed(2)}$`;
-                priceEl.textContent = `${(price * count).toFixed(2)}$`;
-            }
-        }
-        
+
+
+  const id = parseInt(cartItem.dataset.productId);
+  let count = parseInt(countElement.textContent, 10);
+  const product = basket.find(item => item.id === id);
+  const stock = product.stock;
+  const currentPrice = product.price;
+
+  if (event.target.classList.contains('cart__minus')) {
+    if (count > 1) { 
+    count--;
+    // priceEl.textContent = `${(currentPrice * count).toFixed(2)}$`;
+    } else {
+      message.textContent = `Unfortunately there are only ${stock} items in stock`;
+    }
+  } else if (event.target.classList.contains('cart__plus')) {
+      if (stock > count) {
+        count++;
+        // priceEl.textContent = `${(currentPrice * count).toFixed(2)}$`;
+    } else {
+      message.textContent = `Unfortunately there are only ${stock} items in stock`;
+    }
+  }
+  
+        priceEl.textContent = `${(currentPrice * count).toFixed(2)}$`;
         countElement.textContent = count;
+        calculateTotalPrice();
     // }
 });
+
+
